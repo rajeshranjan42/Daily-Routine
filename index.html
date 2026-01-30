@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Daily Routine</title>
+    <link rel="stylesheet" href="mobile.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <!-- ... mobile specific content ... -->
+    <div class="top_header">
+      <div class="header">
+        <h1>Daily Routine</h1>
+        <h3>Good Morning 🥱</h3>
+        <a href="index.html" class="notification_icon_top">
+          <i class="fas fa-bell"></i>
+          <span class="notification_badge">0</span>
+        </a>
+        <div class="date">
+          <p>Friday, 30 January 2026</p>
+        </div>
+      </div>
+      <div class="bottom_div">
+        <div class="nav">
+          <a href="" class="nav_link" id="active">All Tasks</a>
+          <a href="" class="nav_link">Today</a>
+          <a href="" class="nav_link">Upcoming</a>
+        </div>
+
+        <div class="todays_tasks">
+          <div class="remain_tasks">
+            <h4>0 Tasks Remaining</h4>
+            <input
+              type="range"
+              min="0"
+              max="100"
+              value="0"
+              class="task_progress"
+            />
+            <h6>0% Completed</h6>
+          </div>
+          <div class="circle_score">
+            <h2>0%</h2>
+            <p>Productivity Score</p>
+          </div>
+        </div>
+
+        <div class="my_tasks">
+          <h3>My Tasks</h3>
+          <div class="task_list">
+            <div class="task_item completed">
+              <input type="checkbox" checked />
+              <label>Morning Exercise</label>
+            </div>
+            <div class="task_item">
+              <input type="checkbox" />
+              <label>Team Meeting at 10 AM</label>
+            </div>
+            <div class="task_item completed">
+              <input type="checkbox" checked />
+              <label>Project Work</label>
+            </div>
+            <div class="task_item">
+              <input type="checkbox" />
+              <label>Lunch with Sarah</label>
+            </div>
+            <div class="task_item">
+              <input type="checkbox" />
+              <label>Evening Walk</label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer Nav -->
+      <div class="footer_nav">
+        <a href="index.html" class="footer_link"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="newtask.html" class="footer_link"><i class="fas fa-plus-circle"></i><span>New Task</span></a>
+        <a href="profile.html" class="footer_link"><i class="fas fa-user"></i><span>Profile</span></a>
+        <a href="settings.html" class="footer_link"><i class="fas fa-cog"></i><span>Settings</span></a>
+      </div>
+    </div>
+    <script src="app.js"></script>  </body>
+</html>

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>New Task</title>
+    <link rel="stylesheet" href="mobile.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <div class="top_header">
+      <div class="header">
+        <h1>Create Task</h1>
+        <h3>Add Something New ✨</h3>
+        <a href="index.html" class="notification_icon_top">
+          <i class="fas fa-bell"></i>
+          <span class="notification_badge">0</span>
+        </a>
+      </div>
+      <div class="bottom_div">
+        
+        <!-- New Task Form -->
+        <div class="task_form_container">
+          <form class="task_form">
+            
+            <!-- Task Title -->
+            <div class="form_group">
+              <label for="task_title"><i class="fas fa-heading"></i> Task Title</label>
+              <input type="text" id="task_title" class="form_input" placeholder="Enter task title" required />
+            </div>
+
+            <!-- Task Description -->
+            <div class="form_group">
+              <label for="task_description"><i class="fas fa-align-left"></i> Description</label>
+              <textarea id="task_description" class="form_textarea" placeholder="Add task details..." rows="4"></textarea>
+            </div>
+
+            <!-- Task Category -->
+            <div class="form_group">
+              <label for="task_category"><i class="fas fa-tag"></i> Category</label>
+              <select id="task_category" class="form_select">
+                <option value="">Select a category</option>
+                <option value="work">Work</option>
+                <option value="home">Home</option>
+                <option value="health">Health</option>
+                <option value="shopping">Shopping</option>
+                <option value="personal">Personal</option>
+              </select>
+            </div>
+
+            <!-- Task Priority -->
+            <div class="form_group">
+              <label><i class="fas fa-exclamation-circle"></i> Priority</label>
+              <div class="priority_buttons">
+                <button type="button" class="priority_btn" data-priority="low">
+                  <i class="fas fa-arrow-down"></i> Low
+                </button>
+                <button type="button" class="priority_btn active" data-priority="medium">
+                  <i class="fas fa-minus"></i> Medium
+                </button>
+                <button type="button" class="priority_btn" data-priority="high">
+                  <i class="fas fa-arrow-up"></i> High
+                </button>
+              </div>
+            </div>
+
+            <!-- Due Date -->
+            <div class="form_group">
+              <label for="task_date"><i class="fas fa-calendar-alt"></i> Due Date</label>
+              <input type="date" id="task_date" class="form_input" />
+            </div>
+
+            <!-- Due Time -->
+            <div class="form_group">
+              <label for="task_time"><i class="fas fa-clock"></i> Due Time</label>
+              <input type="time" id="task_time" class="form_input" />
+            </div>
+
+            <!-- Subtasks -->
+            <div class="form_group">
+              <label for="subtasks"><i class="fas fa-list-check"></i> Subtasks (optional)</label>
+              <div class="subtasks_container">
+                <div class="subtask_input_group">
+                  <input type="text" class="form_input" placeholder="Add a subtask" />
+                  <button type="button" class="add_subtask_btn" title="Add subtask">
+                    <i class="fas fa-plus"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Reminders -->
+            <div class="form_group">
+              <label><i class="fas fa-bell"></i> Reminder</label>
+              <div class="reminder_options">
+                <div class="reminder_option">
+                  <input type="radio" id="reminder_none" name="reminder" value="none" checked />
+                  <label for="reminder_none">None</label>
+                </div>
+                <div class="reminder_option">
+                  <input type="radio" id="reminder_15min" name="reminder" value="15min" />
+                  <label for="reminder_15min">15 min before</label>
+                </div>
+                <div class="reminder_option">
+                  <input type="radio" id="reminder_1hour" name="reminder" value="1hour" />
+                  <label for="reminder_1hour">1 hour before</label>
+                </div>
+                <div class="reminder_option">
+                  <input type="radio" id="reminder_1day" name="reminder" value="1day" />
+                  <label for="reminder_1day">1 day before</label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Repeat -->
+            <div class="form_group">
+              <label for="task_repeat"><i class="fas fa-repeat"></i> Repeat</label>
+              <select id="task_repeat" class="form_select">
+                <option value="none">No repeat</option>
+                <option value="daily">Daily</option>
+                <option value="weekly">Weekly</option>
+                <option value="monthly">Monthly</option>
+                <option value="yearly">Yearly</option>
+              </select>
+            </div>
+
+            <!-- Form Buttons -->
+            <div class="form_buttons">
+              <button type="button" class="btn_cancel" onclick="window.location.href='index.html'">
+                <i class="fas fa-times"></i> Cancel
+              </button>
+              <button type="submit" class="btn_create">
+                <i class="fas fa-check"></i> Create Task
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </div>
+
+      <!-- Footer Nav -->
+      <div class="footer_nav">
+        <a href="index.html" class="footer_link"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="newtask.html" class="footer_link"><i class="fas fa-plus-circle"></i><span>New Task</span></a>
+        <a href="profile.html" class="footer_link"><i class="fas fa-user"></i><span>Profile</span></a>
+        <a href="settings.html" class="footer_link"><i class="fas fa-cog"></i><span>Settings</span></a>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+      // Priority button selection
+      document.querySelectorAll('.priority_btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.preventDefault();
+          document.querySelectorAll('.priority_btn').forEach(b => b.classList.remove('active'));
+          this.classList.add('active');
+        });
+      });
+
+      // Add subtask button
+      document.querySelector('.add_subtask_btn').addEventListener('click', function(e) {
+        e.preventDefault();
+        const container = document.querySelector('.subtasks_container');
+        const newSubtask = document.createElement('div');
+        newSubtask.className = 'subtask_input_group';
+        newSubtask.innerHTML = `
+          <input type="text" class="form_input" placeholder="Add a subtask" />
+          <button type="button" class="remove_subtask_btn" title="Remove subtask">
+            <i class="fas fa-trash"></i>
+          </button>
+        `;
+        container.appendChild(newSubtask);
+        
+        newSubtask.querySelector('.remove_subtask_btn').addEventListener('click', function(e) {
+          e.preventDefault();
+          newSubtask.remove();
+        });
+      });
+
+      // Form submission
+      document.querySelector('.task_form').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('Task created successfully!');
+        window.location.href = 'index.html';
+      });
+    </script>
+  </body>
+</html>

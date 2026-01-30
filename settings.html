@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Settings</title>
+    <link rel="stylesheet" href="mobile.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  </head>
+  <body>
+    <div class="top_header">
+      <div class="header">
+        <h1>Settings</h1>
+        <h3>Customize Your Experience ⚙️</h3>
+        <a href="index.html" class="notification_icon_top">
+          <i class="fas fa-bell"></i>
+          <span class="notification_badge">0</span>
+        </a>
+      </div>
+      <div class="bottom_div">
+        
+        <!-- Notification Settings -->
+        <div class="settings_category">
+          <h3><i class="fas fa-bell"></i> Notifications</h3>
+          <div class="settings_toggle_item">
+            <div class="toggle_content">
+              <h4>Push Notifications</h4>
+              <p>Get notified about your tasks</p>
+            </div>
+            <div class="toggle_switch">
+              <input type="checkbox" class="toggle_checkbox" checked />
+              <span class="toggle_slider"></span>
+            </div>
+          </div>
+
+          <div class="settings_toggle_item">
+            <div class="toggle_content">
+              <h4>Email Reminders</h4>
+              <p>Receive daily task reminders</p>
+            </div>
+            <div class="toggle_switch">
+              <input type="checkbox" class="toggle_checkbox" />
+              <span class="toggle_slider"></span>
+            </div>
+          </div>
+
+          <div class="settings_toggle_item">
+            <div class="toggle_content">
+              <h4>Sound Effects</h4>
+              <p>Play sounds on task completion</p>
+            </div>
+            <div class="toggle_switch">
+              <input type="checkbox" class="toggle_checkbox" checked />
+              <span class="toggle_slider"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Display Settings -->
+        <div class="settings_category">
+          <h3><i class="fas fa-palette"></i> Display</h3>
+          
+          <div class="settings_select_item">
+            <label>Theme</label>
+            <div class="theme_switcher">
+              <div class="theme_option" data-theme="light">
+                <i class="fas fa-sun"></i> Light
+              </div>
+              <div class="theme_option" data-theme="dark">
+                <i class="fas fa-moon"></i> Dark
+              </div>
+            </div>
+          </div>
+
+          <div class="settings_select_item">
+            <label>Font Size</label>
+            <select class="settings_select">
+              <option>Small</option>
+              <option>Medium (Default)</option>
+              <option>Large</option>
+            </select>
+          </div>
+
+          <div class="settings_toggle_item">
+            <div class="toggle_content">
+              <h4>Dark Mode</h4>
+              <p>Reduce eye strain in low light</p>
+            </div>
+            <div class="toggle_switch">
+              <input type="checkbox" class="toggle_checkbox" />
+              <span class="toggle_slider"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Settings -->
+        <div class="settings_category">
+          <h3><i class="fas fa-tasks"></i> Tasks</h3>
+          
+          <div class="settings_toggle_item">
+            <div class="toggle_content">
+              <h4>Show Completed Tasks</h4>
+              <p>Display finished tasks in the list</p>
+            </div>
+            <div class="toggle_switch">
+              <input type="checkbox" class="toggle_checkbox" checked />
+              <span class="toggle_slider"></span>
+            </div>
+          </div>
+
+          <div class="settings_select_item">
+            <label>Sort By</label>
+            <select class="settings_select">
+              <option>Due Date</option>
+              <option>Priority</option>
+              <option>Recently Added</option>
+            </select>
+          </div>
+
+          <div class="settings_toggle_item">
+            <div class="toggle_content">
+              <h4>Recurring Tasks</h4>
+              <p>Enable repeated tasks</p>
+            </div>
+            <div class="toggle_switch">
+              <input type="checkbox" class="toggle_checkbox" checked />
+              <span class="toggle_slider"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Privacy Settings -->
+        <div class="settings_category">
+          <h3><i class="fas fa-lock"></i> Privacy & Security</h3>
+          
+          <div class="settings_toggle_item">
+            <div class="toggle_content">
+              <h4>Two-Factor Authentication</h4>
+              <p>Add extra security to your account</p>
+            </div>
+            <div class="toggle_switch">
+              <input type="checkbox" class="toggle_checkbox" />
+              <span class="toggle_slider"></span>
+            </div>
+          </div>
+
+          <div class="settings_button_item">
+            <div class="button_content">
+              <h4><i class="fas fa-trash"></i> Clear Cache</h4>
+              <p>Remove cached data</p>
+            </div>
+            <button class="action_btn">Clear</button>
+          </div>
+
+          <div class="settings_button_item">
+            <div class="button_content">
+              <h4><i class="fas fa-download"></i> Export Data</h4>
+              <p>Download your data</p>
+            </div>
+            <button class="action_btn">Export</button>
+          </div>
+        </div>
+
+        <!-- About Section -->
+        <div class="settings_category">
+          <h3><i class="fas fa-info-circle"></i> About</h3>
+          
+          <div class="about_item">
+            <div class="about_content">
+              <h4>App Version</h4>
+              <p>v1.0.0</p>
+            </div>
+          </div>
+
+          <div class="about_item">
+            <div class="about_content">
+              <h4>Last Updated</h4>
+              <p>January 31, 2026</p>
+            </div>
+          </div>
+
+          <div class="settings_button_item">
+            <div class="button_content">
+              <h4><i class="fas fa-envelope"></i> Send Feedback</h4>
+              <p>Help us improve the app</p>
+            </div>
+            <button class="action_btn">Send</button>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer Nav -->
+      <div class="footer_nav">
+        <a href="index.html" class="footer_link"><i class="fas fa-home"></i><span>Home</span></a>
+        <a href="newtask.html" class="footer_link"><i class="fas fa-plus-circle"></i><span>New Task</span></a>
+        <a href="profile.html" class="footer_link"><i class="fas fa-user"></i><span>Profile</span></a>
+        <a href="settings.html" class="footer_link"><i class="fas fa-cog"></i><span>Settings</span></a>
+      </div>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
