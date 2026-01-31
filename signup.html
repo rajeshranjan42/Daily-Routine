@@ -111,94 +111,96 @@
       </div>
     </div>
 
-    <script src="app.js"></script>
     <script>
       // Toggle password visibility for password field
       const togglePassword = document.getElementById('togglePassword');
       const passwordInput = document.getElementById('signup_password');
 
-      togglePassword.addEventListener('click', function(e) {
-        e.preventDefault();
-        const type = passwordInput.type === 'password' ? 'text' : 'password';
-        passwordInput.type = type;
-        this.querySelector('i').classList.toggle('fa-eye');
-        this.querySelector('i').classList.toggle('fa-eye-slash');
-      });
+      if (togglePassword && passwordInput) {
+        togglePassword.addEventListener('click', function(e) {
+          e.preventDefault();
+          const type = passwordInput.type === 'password' ? 'text' : 'password';
+          passwordInput.type = type;
+          this.querySelector('i').classList.toggle('fa-eye');
+          this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+      }
 
       // Toggle password visibility for confirm password field
       const toggleConfirm = document.getElementById('toggleConfirm');
       const confirmInput = document.getElementById('signup_confirm');
 
-      toggleConfirm.addEventListener('click', function(e) {
-        e.preventDefault();
-        const type = confirmInput.type === 'password' ? 'text' : 'password';
-        confirmInput.type = type;
-        this.querySelector('i').classList.toggle('fa-eye');
-        this.querySelector('i').classList.toggle('fa-eye-slash');
-      });
+      if (toggleConfirm && confirmInput) {
+        toggleConfirm.addEventListener('click', function(e) {
+          e.preventDefault();
+          const type = confirmInput.type === 'password' ? 'text' : 'password';
+          confirmInput.type = type;
+          this.querySelector('i').classList.toggle('fa-eye');
+          this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+      }
 
       // Handle sign up form submission
-      document.getElementById('signupForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const fullName = document.getElementById('signup_name').value;
-        const email = document.getElementById('signup_email').value;
-        const password = document.getElementById('signup_password').value;
-        const confirmPassword = document.getElementById('signup_confirm').value;
-        const termsAccepted = document.getElementById('terms').checked;
+      const signupForm = document.getElementById('signupForm');
+      if (signupForm) {
+        signupForm.addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const fullName = document.getElementById('signup_name').value;
+          const email = document.getElementById('signup_email').value;
+          const password = document.getElementById('signup_password').value;
+          const confirmPassword = document.getElementById('signup_confirm').value;
+          const termsAccepted = document.getElementById('terms').checked;
 
-        // Validate passwords match
-        if (password !== confirmPassword) {
-          notificationManager.error('Passwords do not match!');
-          return;
-        }
+          // Validate passwords match
+          if (password !== confirmPassword) {
+            alert('Passwords do not match!');
+            return;
+          }
 
-        // Validate password strength (at least 6 characters)
-        if (password.length < 6) {
-          notificationManager.error('Password must be at least 6 characters long!');
-          return;
-        }
+          // Validate password strength (at least 6 characters)
+          if (password.length < 6) {
+            alert('Password must be at least 6 characters long!');
+            return;
+          }
 
-        // Validate terms accepted
-        if (!termsAccepted) {
-          notificationManager.error('Please accept the terms and conditions!');
-          return;
-        }
+          // Validate terms accepted
+          if (!termsAccepted) {
+            alert('Please accept the terms and conditions!');
+            return;
+          }
 
-        // Validate email format
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(email)) {
-          notificationManager.error('Please enter a valid email address!');
-          return;
-        }
+          // Validate email format
+          const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+          if (!emailRegex.test(email)) {
+            alert('Please enter a valid email address!');
+            return;
+          }
 
-        // Store user data in localStorage (in real app, this would be server-side)
-        const userData = {
-          name: fullName,
-          email: email,
-          password: password, // Note: Never store passwords in plain text in production!
-          createdAt: new Date().toISOString(),
-          avatar: '👤',
-          joinDate: new Date().toISOString(),
-          totalTasks: 0,
-          completedTasks: 0,
-          streak: 0,
-          successRate: 0
-        };
+          // Store user data in localStorage
+          const userData = {
+            name: fullName,
+            email: email,
+            password: password,
+            createdAt: new Date().toISOString(),
+            avatar: '👤',
+            joinDate: new Date().toISOString(),
+            totalTasks: 0,
+            completedTasks: 0,
+            streak: 0,
+            successRate: 0
+          };
 
-        // Save to localStorage
-        localStorage.setItem('user', JSON.stringify(userData));
-
-        notificationManager.success('Account created successfully! Redirecting...');
-        
-        setTimeout(() => {
+          localStorage.setItem('user', JSON.stringify(userData));
+          alert('Account created successfully! Redirecting...');
+          
           // Auto-login the user
           sessionStorage.setItem('isLoggedIn', 'true');
           sessionStorage.setItem('userEmail', email);
           
           window.location.href = 'index.html';
-        }, 1500);
-      });
+        });
+      }
     </script>
   </body>
 </html>
