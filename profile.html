@@ -147,11 +147,234 @@
       <div class="footer_nav">
         <a href="index.html" class="footer_link"><i class="fas fa-home"></i><span>Home</span></a>
         <a href="newtask.html" class="footer_link"><i class="fas fa-plus-circle"></i><span>New Task</span></a>
+        <a href="#" class="footer_link" id="completedTasksLink"><i class="fas fa-check-circle"></i><span>Completed</span></a>
         <a href="profile.html" class="footer_link"><i class="fas fa-user"></i><span>Profile</span></a>
         <a href="settings.html" class="footer_link"><i class="fas fa-cog"></i><span>Settings</span></a>
       </div>
     </div>
 
     <script src="app.js"></script>
+    <script>
+      // Profile page functionality
+      document.addEventListener('DOMContentLoaded', function() {
+        // Add click handlers to setting items
+        const settingItems = document.querySelectorAll('.setting_item');
+        
+        if (settingItems.length > 0) {
+          // Edit Profile
+          settingItems[0].style.cursor = 'pointer';
+          settingItems[0].onclick = function() {
+            showEditProfileModal();
+          };
+          
+          // Change Password
+          settingItems[1].style.cursor = 'pointer';
+          settingItems[1].onclick = function() {
+            showChangePasswordModal();
+          };
+          
+          // Notifications
+          settingItems[2].style.cursor = 'pointer';
+          settingItems[2].onclick = function() {
+            showNotificationsModal();
+          };
+          
+          // Theme
+          settingItems[3].style.cursor = 'pointer';
+          settingItems[3].onclick = function() {
+            showThemeModal();
+          };
+        }
+        
+        function showEditProfileModal() {
+          const user = userManager.getUser();
+          const modal = document.createElement('div');
+          modal.className = 'modal_overlay';
+          modal.innerHTML = `
+            <div class="modal_content">
+              <h3>Edit Profile</h3>
+              <form id="editForm">
+                <input type="file" id="profileImg" accept="image/*" style="margin: 10px 0;" />
+                <input type="text" id="profileName" value="${user.name}" placeholder="Name" style="width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" />
+                <input type="email" id="profileEmail" value="${user.email}" placeholder="Email" style="width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" />
+                <div style="margin-top: 15px;">
+                  <button type="button" onclick="this.closest('.modal_overlay').remove()" style="padding: 10px 20px; margin-right: 10px; background: #ccc; border: none; border-radius: 5px;">Cancel</button>
+                  <button type="submit" style="padding: 10px 20px; background: #f4c97a; color: white; border: none; border-radius: 5px;">Save</button>
+                </div>
+              </form>
+            </div>
+          `;
+          
+          modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+          modal.querySelector('.modal_content').style.cssText = 'background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px;';
+          
+          document.body.appendChild(modal);
+          
+          modal.querySelector('#editForm').onsubmit = function(e) {
+            e.preventDefault();
+            const name = document.getElementById('profileName').value;
+            const email = document.getElementById('profileEmail').value;
+            const file = document.getElementById('profileImg').files[0];
+            
+            if (file) {
+              const reader = new FileReader();
+              reader.onload = function(e) {
+                userManager.updateUser({ name, email, avatar: e.target.result });
+                updateProfileDisplay();
+                updateAvatarDisplay();
+                notificationManager.success('Profile updated!');
+                modal.remove();
+              };
+              reader.readAsDataURL(file);
+            } else {
+              userManager.updateUser({ name, email });
+              updateProfileDisplay();
+              notificationManager.success('Profile updated!');
+              modal.remove();
+            }
+          };
+        }
+        
+        function showChangePasswordModal() {
+          const modal = document.createElement('div');
+          modal.className = 'modal_overlay';
+          modal.innerHTML = `
+            <div class="modal_content">
+              <h3>Change Password</h3>
+              <form id="passwordForm">
+                <input type="password" id="currentPass" placeholder="Current Password" style="width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" required />
+                <input type="password" id="newPass" placeholder="New Password" minlength="6" style="width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" required />
+                <input type="password" id="confirmPass" placeholder="Confirm Password" style="width: 100%; padding: 10px; margin: 5px 0; border: 1px solid #ddd; border-radius: 5px;" required />
+                <div style="margin-top: 15px;">
+                  <button type="button" onclick="this.closest('.modal_overlay').remove()" style="padding: 10px 20px; margin-right: 10px; background: #ccc; border: none; border-radius: 5px;">Cancel</button>
+                  <button type="submit" style="padding: 10px 20px; background: #f4c97a; color: white; border: none; border-radius: 5px;">Change</button>
+                </div>
+              </form>
+            </div>
+          `;
+          
+          modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+          modal.querySelector('.modal_content').style.cssText = 'background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px;';
+          
+          document.body.appendChild(modal);
+          
+          modal.querySelector('#passwordForm').onsubmit = function(e) {
+            e.preventDefault();
+            const current = document.getElementById('currentPass').value;
+            const newPass = document.getElementById('newPass').value;
+            const confirm = document.getElementById('confirmPass').value;
+            const user = userManager.getUser();
+            
+            if (current !== user.password) {
+              notificationManager.error('Current password incorrect!');
+              return;
+            }
+            if (newPass !== confirm) {
+              notificationManager.error('Passwords do not match!');
+              return;
+            }
+            
+            userManager.updateUser({ password: newPass });
+            notificationManager.success('Password changed!');
+            modal.remove();
+          };
+        }
+        
+        function showNotificationsModal() {
+          const settings = settingsManager.getAllSettings();
+          const modal = document.createElement('div');
+          modal.className = 'modal_overlay';
+          modal.innerHTML = `
+            <div class="modal_content">
+              <h3>Notifications</h3>
+              <form id="notifForm">
+                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                  <label>Push Notifications</label>
+                  <input type="checkbox" id="pushNotif" ${settings.pushNotifications ? 'checked' : ''} />
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                  <label>Email Reminders</label>
+                  <input type="checkbox" id="emailNotif" ${settings.emailReminders ? 'checked' : ''} />
+                </div>
+                <div style="display: flex; justify-content: space-between; margin: 10px 0;">
+                  <label>Sound Effects</label>
+                  <input type="checkbox" id="soundNotif" ${settings.soundEffects ? 'checked' : ''} />
+                </div>
+                <div style="margin-top: 15px;">
+                  <button type="button" onclick="this.closest('.modal_overlay').remove()" style="padding: 10px 20px; margin-right: 10px; background: #ccc; border: none; border-radius: 5px;">Cancel</button>
+                  <button type="submit" style="padding: 10px 20px; background: #f4c97a; color: white; border: none; border-radius: 5px;">Save</button>
+                </div>
+              </form>
+            </div>
+          `;
+          
+          modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+          modal.querySelector('.modal_content').style.cssText = 'background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px;';
+          
+          document.body.appendChild(modal);
+          
+          modal.querySelector('#notifForm').onsubmit = function(e) {
+            e.preventDefault();
+            settingsManager.updateSetting('pushNotifications', document.getElementById('pushNotif').checked);
+            settingsManager.updateSetting('emailReminders', document.getElementById('emailNotif').checked);
+            settingsManager.updateSetting('soundEffects', document.getElementById('soundNotif').checked);
+            notificationManager.success('Settings updated!');
+            modal.remove();
+          };
+        }
+        
+        function showThemeModal() {
+          const isDark = settingsManager.getSetting('darkMode');
+          const modal = document.createElement('div');
+          modal.className = 'modal_overlay';
+          modal.innerHTML = `
+            <div class="modal_content">
+              <h3>Theme</h3>
+              <form id="themeForm">
+                <div style="margin: 15px 0;">
+                  <label style="display: flex; align-items: center; margin: 10px 0;">
+                    <input type="radio" name="theme" value="light" ${!isDark ? 'checked' : ''} style="margin-right: 10px;" />
+                    <i class="fas fa-sun" style="margin-right: 10px;"></i> Light Mode
+                  </label>
+                  <label style="display: flex; align-items: center; margin: 10px 0;">
+                    <input type="radio" name="theme" value="dark" ${isDark ? 'checked' : ''} style="margin-right: 10px;" />
+                    <i class="fas fa-moon" style="margin-right: 10px;"></i> Dark Mode
+                  </label>
+                </div>
+                <div style="margin-top: 15px;">
+                  <button type="button" onclick="this.closest('.modal_overlay').remove()" style="padding: 10px 20px; margin-right: 10px; background: #ccc; border: none; border-radius: 5px;">Cancel</button>
+                  <button type="submit" style="padding: 10px 20px; background: #f4c97a; color: white; border: none; border-radius: 5px;">Apply</button>
+                </div>
+              </form>
+            </div>
+          `;
+          
+          modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+          modal.querySelector('.modal_content').style.cssText = 'background: white; padding: 20px; border-radius: 10px; width: 90%; max-width: 400px;';
+          
+          document.body.appendChild(modal);
+          
+          modal.querySelector('#themeForm').onsubmit = function(e) {
+            e.preventDefault();
+            const selectedTheme = document.querySelector('input[name="theme"]:checked').value;
+            settingsManager.updateSetting('darkMode', selectedTheme === 'dark');
+            notificationManager.success(`${selectedTheme === 'dark' ? 'Dark' : 'Light'} mode enabled!`);
+            modal.remove();
+          };
+        }
+        
+        // Update avatar display function
+        function updateAvatarDisplay() {
+          const user = userManager.getUser();
+          const avatarElement = document.querySelector('.profile_avatar');
+          if (avatarElement && user.avatar && user.avatar.startsWith('data:image')) {
+            avatarElement.innerHTML = `<img src="${user.avatar}" style="width: 60px; height: 60px; border-radius: 50%; object-fit: cover;" />`;
+          }
+        }
+        
+        // Initialize avatar display on page load
+        updateAvatarDisplay();
+      });
+    </script>
   </body>
 </html>
