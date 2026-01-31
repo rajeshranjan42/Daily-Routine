@@ -71,7 +71,7 @@
 
         <!-- Sign Up Link -->
         <div class="login_footer">
-          <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+          <p>Don't have an account? <a href="signup.html" id="sign_up">Sign up here</a></p>
         </div>
       </div>
 
@@ -85,6 +85,15 @@
 
     <script src="app.js"></script>
     <script>
+      // Simple notification fallback
+      function showNotification(message, type = 'info') {
+        if (typeof notificationManager !== 'undefined') {
+          notificationManager[type](message);
+        } else {
+          alert(message);
+        }
+      }
+
       // Toggle password visibility
       const togglePassword = document.getElementById('togglePassword');
       const passwordInput = document.getElementById('login_password');
@@ -114,18 +123,27 @@
             localStorage.setItem('rememberEmail', email);
           }
 
-          notificationManager.success('Login successful! Redirecting...');
+          showNotification('Login successful! Redirecting...', 'success');
           
           setTimeout(() => {
             window.location.href = 'index.html';
           }, 1000);
         } else {
-          notificationManager.error('Invalid email or password!');
+          showNotification('Invalid email or password!', 'error');
         }
       });
 
       // Simple authentication function
       function authenticateUser(email, password) {
+        // Check for user created via signup
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          const userData = JSON.parse(storedUser);
+          if (userData.email === email && userData.password === password) {
+            return true;
+          }
+        }
+        
         // Demo credentials
         const validCredentials = {
           'rajesh.ranjan@email.com': 'password123',
