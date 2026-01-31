@@ -280,11 +280,79 @@ const userManager = new UserManager();
 
 class NotificationManager {
   constructor() {
-    this.notifications = [];
+    this.notifications = this.loadNotifications();
+  }
+
+  // Load notifications from localStorage
+  loadNotifications() {
+    const stored = localStorage.getItem('notifications');
+    return stored ? JSON.parse(stored) : [];
+  }
+
+  // Save notifications to localStorage
+  saveNotifications() {
+    localStorage.setItem('notifications', JSON.stringify(this.notifications));
+  }
+
+  // Add notification to history
+  addNotification(message, type = 'info') {
+    const notification = {
+      id: Date.now(),
+      message,
+      type,
+      timestamp: new Date().toISOString(),
+      read: false
+    };
+    this.notifications.unshift(notification);
+    if (this.notifications.length > 50) {
+      this.notifications = this.notifications.slice(0, 50);
+    }
+    this.saveNotifications();
+    this.updateNotificationBadge();
+  }
+
+  // Get all notifications
+  getAllNotifications() {
+    return this.notifications;
+  }
+
+  // Get unread notifications count
+  getUnreadCount() {
+    return this.notifications.filter(n => !n.read).length;
+  }
+
+  // Mark notification as read
+  markAsRead(id) {
+    const notification = this.notifications.find(n => n.id === id);
+    if (notification) {
+      notification.read = true;
+      this.saveNotifications();
+      this.updateNotificationBadge();
+    }
+  }
+
+  // Mark all as read
+  markAllAsRead() {
+    this.notifications.forEach(n => n.read = true);
+    this.saveNotifications();
+    this.updateNotificationBadge();
+  }
+
+  // Update notification badge
+  updateNotificationBadge() {
+    const badges = document.querySelectorAll('.notification_badge');
+    const unreadCount = this.getUnreadCount();
+    badges.forEach(badge => {
+      badge.textContent = unreadCount;
+      badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+    });
   }
 
   // Show notification
   show(message, type = 'info', duration = 3000) {
+    // Add to notification history
+    this.addNotification(message, type);
+
     const notification = {
       id: Date.now(),
       message,
@@ -413,7 +481,111 @@ function updateDashboardStats() {
   updateNotificationBadge();
 }
 
-// Render task list with filter
+// Show only completed tasks view
+function showCompletedTasksView() {
+  // Hide main tasks section
+  const myTasks = document.querySelector('.my_tasks');
+  const completedSection = document.querySelector('.completed_section');
+  
+  if (myTasks) myTasks.style.display = 'none';
+  if (completedSection) completedSection.style.display = 'none';
+  
+  // Create or show completed tasks view
+  let completedView = document.querySelector('.completed_tasks_view');
+  if (!completedView) {
+    completedView = document.createElement('div');
+    completedView.className = 'my_tasks completed_tasks_view';
+    completedView.innerHTML = `
+      <h3><i class="fas fa-check-circle"></i> Completed Tasks</h3>
+      <div class="completed_tasks_list"></div>
+      <button class="back_to_home_btn" onclick="showHomeView()">← Back to Home</button>
+    `;
+    document.querySelector('.bottom_div').appendChild(completedView);
+  } else {
+    completedView.style.display = 'block';
+  }
+  
+  // Render completed tasks in the view
+  renderCompletedTasksInView();
+}
+
+// Show home view
+function showHomeView() {
+  const myTasks = document.querySelector('.my_tasks');
+  const completedSection = document.querySelector('.completed_section');
+  const completedView = document.querySelector('.completed_tasks_view');
+  
+  if (myTasks) myTasks.style.display = 'block';
+  if (completedSection) completedSection.style.display = 'block';
+  if (completedView) completedView.style.display = 'none';
+}
+
+// Render completed tasks in dedicated view
+function renderCompletedTasksInView() {
+  const completedTasksList = document.querySelector('.completed_tasks_list');
+  if (!completedTasksList) return;
+
+  const completedTasks = taskManager.getCompletedTasks();
+  completedTasksList.innerHTML = '';
+
+  if (completedTasks.length === 0) {
+    completedTasksList.innerHTML = `<p style="text-align: center; color: #9e9e9e; padding: 40px;">No completed tasks yet.</p>`;
+    return;
+  }
+
+  completedTasks.forEach(task => {
+    const taskItem = document.createElement('div');
+    taskItem.className = 'task_item completed';
+    
+    const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    const dueDateText = dueDate ? ` · ${dueDate}` : '';
+    
+    taskItem.innerHTML = `
+      <input type="checkbox" checked disabled class="task-checkbox" />
+      <div style="flex: 1;">
+        <label style="margin: 0; text-decoration: line-through; opacity: 0.7;">${task.title}</label>
+        ${task.dueTime ? `<p style="font-size: 12px; color: #9e9e9e; margin: 3px 0 0 0;">⏰ ${task.dueTime}${dueDateText}</p>` : `${dueDate ? `<p style="font-size: 12px; color: #9e9e9e; margin: 3px 0 0 0;">${dueDate}</p>` : ''}`}
+      </div>
+      <span style="color: #9cc3a5; font-weight: bold; font-size: 16px;">✓</span>
+    `;
+
+    completedTasksList.appendChild(taskItem);
+  });
+}
+function renderCompletedTasks() {
+  const completedTaskList = document.querySelector('.completed_task_list');
+  if (!completedTaskList) return;
+
+  const completedTasks = taskManager.getCompletedTasks();
+  completedTaskList.innerHTML = '';
+
+  if (completedTasks.length === 0) {
+    completedTaskList.innerHTML = `<p style="text-align: center; color: #9e9e9e; padding: 20px;">No completed tasks yet.</p>`;
+    return;
+  }
+
+  completedTasks.forEach(task => {
+    const taskItem = document.createElement('div');
+    taskItem.className = 'task_item completed';
+    
+    const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
+    const dueDateText = dueDate ? ` · ${dueDate}` : '';
+    
+    taskItem.innerHTML = `
+      <input type="checkbox" checked disabled class="task-checkbox" data-task-id="${task.id}" />
+      <div style="flex: 1;">
+        <label style="margin: 0; text-decoration: line-through; opacity: 0.7;">${task.title}</label>
+        ${task.dueTime ? `<p style="font-size: 12px; color: #9e9e9e; margin: 3px 0 0 0;">⏰ ${task.dueTime}${dueDateText}</p>` : `${dueDate ? `<p style="font-size: 12px; color: #9e9e9e; margin: 3px 0 0 0;">${dueDate}</p>` : ''}`}
+      </div>
+      <span style="color: #9cc3a5; font-weight: bold; font-size: 12px;">✓</span>
+    `;
+
+    // Completed tasks cannot be unchecked
+    // No event listener needed for disabled checkboxes
+
+    completedTaskList.appendChild(taskItem);
+  });
+}
 function renderTaskList(filter = 'all') {
   currentFilter = filter;
   const taskList = document.querySelector('.task_list');
@@ -435,8 +607,11 @@ function renderTaskList(filter = 'all') {
       tasks = taskManager.getAllTasks();
   }
 
+  // Filter out completed tasks
+  tasks = tasks.filter(task => !task.completed);
+
   if (tasks.length === 0) {
-    const message = filter === 'all' ? 'No tasks yet. Create one to get started!' :
+    const message = filter === 'all' ? 'No pending tasks. Great job!' :
                     filter === 'today' ? 'No tasks for today!' :
                     'No upcoming tasks!';
     taskList.innerHTML = `<p style="text-align: center; color: #9e9e9e; padding: 20px;">${message}</p>`;
@@ -445,26 +620,76 @@ function renderTaskList(filter = 'all') {
 
   tasks.forEach(task => {
     const taskItem = document.createElement('div');
-    taskItem.className = `task_item ${task.completed ? 'completed' : ''}`;
+    taskItem.className = 'task_item swipeable';
     
     const dueDate = task.dueDate ? new Date(task.dueDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '';
     const dueDateText = dueDate ? ` · ${dueDate}` : '';
     
     taskItem.innerHTML = `
-      <input type="checkbox" ${task.completed ? 'checked' : ''} class="task-checkbox" data-task-id="${task.id}" />
-      <div style="flex: 1;">
-        <label style="margin: 0;">${task.title}</label>
-        ${task.dueTime ? `<p style="font-size: 12px; color: #9e9e9e; margin: 3px 0 0 0;">⏰ ${task.dueTime}${dueDateText}</p>` : `${dueDate ? `<p style="font-size: 12px; color: #9e9e9e; margin: 3px 0 0 0;">${dueDate}</p>` : ''}`}
+      <div class="task_content">
+        <input type="checkbox" class="task-checkbox" data-task-id="${task.id}" />
+        <div style="flex: 1;">
+          <label style="margin: 0;">${task.title}</label>
+          ${task.dueTime ? `<p style="font-size: 12px; color: #9e9e9e; margin: 3px 0 0 0;">⏰ ${task.dueTime}${dueDateText}</p>` : `${dueDate ? `<p style="font-size: 12px; color: #9e9e9e; margin: 3px 0 0 0;">${dueDate}</p>` : ''}`}
+        </div>
+        ${task.priority === 'high' ? '<span style="color: #d98c7c; font-weight: bold; font-size: 12px;">●</span>' : ''}
       </div>
-      ${task.priority === 'high' ? '<span style="color: #d98c7c; font-weight: bold; font-size: 12px;">●</span>' : ''}
+      <div class="delete_action">
+        <i class="fas fa-trash"></i>
+      </div>
     `;
+
+    // Add swipe functionality
+    let startX = 0;
+    let currentX = 0;
+    let isDragging = false;
+
+    taskItem.addEventListener('touchstart', function(e) {
+      startX = e.touches[0].clientX;
+      isDragging = true;
+    });
+
+    taskItem.addEventListener('touchmove', function(e) {
+      if (!isDragging) return;
+      currentX = e.touches[0].clientX;
+      const diffX = startX - currentX;
+      
+      if (diffX > 0 && diffX <= 80) {
+        taskItem.style.transform = `translateX(-${diffX}px)`;
+      }
+    });
+
+    taskItem.addEventListener('touchend', function(e) {
+      if (!isDragging) return;
+      isDragging = false;
+      
+      const diffX = startX - currentX;
+      if (diffX > 40) {
+        taskItem.style.transform = 'translateX(-80px)';
+        taskItem.classList.add('swiped');
+      } else {
+        taskItem.style.transform = 'translateX(0)';
+        taskItem.classList.remove('swiped');
+      }
+    });
+
+    // Delete button click
+    taskItem.querySelector('.delete_action').addEventListener('click', function() {
+      if (confirm('Delete this task?')) {
+        taskManager.deleteTask(task.id);
+        renderTaskList(currentFilter);
+        updateDashboardStats();
+        notificationManager.success('Task deleted!');
+      }
+    });
 
     // Add checkbox event listener
     taskItem.querySelector('.task-checkbox').addEventListener('change', function() {
       taskManager.toggleTask(task.id);
       renderTaskList(currentFilter);
+      renderCompletedTasks();
       updateDashboardStats();
-      notificationManager.success('Task updated!');
+      notificationManager.success('Task completed!');
     });
 
     taskList.appendChild(taskItem);
@@ -647,6 +872,18 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
+  // Setup notification bell click handler
+  const notificationIcons = document.querySelectorAll('.notification_icon_top');
+  notificationIcons.forEach(icon => {
+    icon.addEventListener('click', function(e) {
+      e.preventDefault();
+      showNotificationsModal();
+    });
+  });
+
+  // Initialize range sliders
+  initializeRangeSliders();
+
   // Apply saved settings
   settingsManager.applyTheme(settingsManager.getSetting('theme'));
   settingsManager.applyFontSize(settingsManager.getSetting('fontSize'));
@@ -670,6 +907,15 @@ document.addEventListener('DOMContentLoaded', function() {
   // Handle new task form
   handleNewTaskForm();
 
+  // Add completed tasks footer link handler
+  const completedTasksLink = document.getElementById('completedTasksLink');
+  if (completedTasksLink) {
+    completedTasksLink.addEventListener('click', function(e) {
+      e.preventDefault();
+      showCompletedTasksView();
+    });
+  }
+
   // Initialize event listeners
   initEventListeners();
 
@@ -677,6 +923,9 @@ document.addEventListener('DOMContentLoaded', function() {
   if (document.querySelector('.theme_option')) {
     setupThemeSwitcher();
   }
+
+  // Update notification badge on load
+  notificationManager.updateNotificationBadge();
 
   console.log('✅ Daily Routine App Initialized');
   console.log('📊 Total Tasks:', taskManager.getAllTasks().length);
@@ -819,6 +1068,52 @@ function setupThemeSwitcher() {
   }
 }
 
+// Initialize range sliders with dynamic colors
+function initializeRangeSliders() {
+  const rangeInputs = document.querySelectorAll('input[type="range"]');
+  
+  rangeInputs.forEach(range => {
+    // Update range on input
+    range.addEventListener('input', function() {
+      updateRangeSlider(this);
+    });
+    
+    // Initial update
+    updateRangeSlider(range);
+  });
+}
+
+// Update range slider colors and progress
+function updateRangeSlider(range) {
+  const value = parseInt(range.value);
+  const min = parseInt(range.min) || 0;
+  const max = parseInt(range.max) || 100;
+  const percentage = ((value - min) / (max - min)) * 100;
+  
+  // Update CSS custom property for progress
+  range.style.setProperty('--progress', `${percentage}%`);
+  
+  // Remove existing color classes
+  range.classList.remove('range-low', 'range-medium', 'range-high', 'range-excellent');
+  
+  // Add appropriate color class based on percentage
+  if (percentage <= 25) {
+    range.classList.add('range-low');
+  } else if (percentage <= 50) {
+    range.classList.add('range-medium');
+  } else if (percentage <= 75) {
+    range.classList.add('range-high');
+  } else {
+    range.classList.add('range-excellent');
+  }
+  
+  // Update value display if it exists
+  const valueDisplay = range.nextElementSibling;
+  if (valueDisplay && valueDisplay.classList.contains('range-value')) {
+    valueDisplay.textContent = `${Math.round(percentage)}%`;
+  }
+}
+
 // ==========================================
 // 10. CSS ANIMATIONS
 // ==========================================
@@ -847,6 +1142,371 @@ style.textContent = `
       opacity: 0;
     }
   }
+
+  .task_item.swipeable {
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s ease;
+  }
+
+  .task_item .task_content {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    background: white;
+    position: relative;
+    z-index: 2;
+  }
+
+  .task_item .delete_action {
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 80px;
+    background: #d98c7c;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    z-index: 1;
+  }
+
+  .task_item.swiped .delete_action {
+    animation: pulse 0.3s ease;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+
+  /* Ultra Premium Range Input Styling */
+  .range-wrapper {
+    position: relative;
+    padding: 20px 0;
+    margin: 20px 0;
+  }
+
+  input[type="range"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, 
+      #f4c97a 0%, 
+      #f4c97a var(--progress, 50%), 
+      rgba(232, 232, 232, 0.3) var(--progress, 50%), 
+      rgba(232, 232, 232, 0.3) 100%);
+    outline: none;
+    margin: 20px 0;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 1px 2px rgba(244, 201, 122, 0.2);
+  }
+
+  input[type="range"]:hover {
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1), 0 4px 12px rgba(244, 201, 122, 0.4);
+    transform: translateY(-1px);
+  }
+
+  input[type="range"]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff 0%, #f4c97a 40%, #e6b566 100%);
+    cursor: pointer;
+    border: 4px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 
+      0 0 0 1px rgba(244, 201, 122, 0.3),
+      0 6px 20px rgba(244, 201, 122, 0.4),
+      0 2px 8px rgba(0, 0, 0, 0.15),
+      inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+  }
+
+  input[type="range"]::-webkit-slider-thumb:hover {
+    transform: scale(1.2) translateY(-2px);
+    box-shadow: 
+      0 0 0 2px rgba(244, 201, 122, 0.5),
+      0 8px 25px rgba(244, 201, 122, 0.6),
+      0 4px 12px rgba(0, 0, 0, 0.2),
+      inset 0 1px 3px rgba(255, 255, 255, 0.9);
+    background: radial-gradient(circle at 30% 30%, #fff 0%, #f2c068 40%, #e4b364 100%);
+  }
+
+  input[type="range"]::-webkit-slider-thumb:active {
+    transform: scale(1.1);
+    box-shadow: 
+      0 0 0 3px rgba(244, 201, 122, 0.7),
+      0 4px 15px rgba(244, 201, 122, 0.5),
+      inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  input[type="range"]::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, #fff 0%, #f4c97a 40%, #e6b566 100%);
+    cursor: pointer;
+    border: 4px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 
+      0 0 0 1px rgba(244, 201, 122, 0.3),
+      0 6px 20px rgba(244, 201, 122, 0.4),
+      0 2px 8px rgba(0, 0, 0, 0.15);
+    transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  input[type="range"]::-moz-range-track {
+    width: 100%;
+    height: 12px;
+    border-radius: 6px;
+    background: rgba(232, 232, 232, 0.3);
+    border: none;
+  }
+
+  input[type="range"]:focus {
+    outline: none;
+  }
+
+  input[type="range"]:focus::-webkit-slider-thumb {
+    box-shadow: 
+      0 0 0 4px rgba(244, 201, 122, 0.3),
+      0 0 0 6px rgba(244, 201, 122, 0.1),
+      0 6px 20px rgba(244, 201, 122, 0.4),
+      inset 0 1px 2px rgba(255, 255, 255, 0.8);
+  }
+
+  /* Animated progress indicator */
+  .range-progress {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    height: 12px;
+    background: linear-gradient(90deg, #f4c97a 0%, #f2c068 100%);
+    border-radius: 6px;
+    transform: translateY(-50%);
+    transition: width 0.3s ease;
+    box-shadow: 0 2px 8px rgba(244, 201, 122, 0.3);
+    z-index: -1;
+  }
+
+  /* Premium value display */
+  .range-value {
+    position: absolute;
+    top: -45px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #333 0%, #555 100%);
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    min-width: 40px;
+    text-align: center;
+  }
+
+  .range-value::after {
+    content: '';
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: #333;
+  }
+
+  input[type="range"]:hover + .range-value,
+  input[type="range"]:focus + .range-value {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-5px);
+  }
+
+  /* Tick marks */
+  .range-ticks {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 2px;
+    transform: translateY(-50%);
+    z-index: -2;
+  }
+
+  .range-tick {
+    position: absolute;
+    width: 2px;
+    height: 8px;
+    background: rgba(244, 201, 122, 0.3);
+    transform: translateY(-50%);
+  }
+
+  .range-tick.major {
+    height: 12px;
+    width: 3px;
+    background: rgba(244, 201, 122, 0.5);
+  }
+
+  /* Enhanced labels */
+  .range-labels {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+    font-size: 12px;
+    color: #666;
+    font-weight: 500;
+  }
+
+  .range-label {
+    padding: 4px 8px;
+    background: rgba(244, 201, 122, 0.1);
+    border-radius: 4px;
+    transition: all 0.3s ease;
+  }
+
+  .range-label:hover {
+    background: rgba(244, 201, 122, 0.2);
+    color: #333;
+  }
+
+  /* Glow effect on interaction */
+  @keyframes rangeGlow {
+    0% { box-shadow: 0 0 5px rgba(244, 201, 122, 0.5); }
+    50% { box-shadow: 0 0 20px rgba(244, 201, 122, 0.8); }
+    100% { box-shadow: 0 0 5px rgba(244, 201, 122, 0.5); }
+  }
+
+  input[type="range"]:active {
+    animation: rangeGlow 0.6s ease-in-out;
+  }
+
+  /* Dynamic color classes */
+  input[type="range"].range-low {
+    background: linear-gradient(90deg, 
+      #ff6b6b 0%, 
+      #ff6b6b var(--progress, 0%), 
+      rgba(232, 232, 232, 0.3) var(--progress, 0%), 
+      rgba(232, 232, 232, 0.3) 100%);
+  }
+
+  input[type="range"].range-medium {
+    background: linear-gradient(90deg, 
+      #ffd93d 0%, 
+      #ffd93d var(--progress, 0%), 
+      rgba(232, 232, 232, 0.3) var(--progress, 0%), 
+      rgba(232, 232, 232, 0.3) 100%);
+  }
+
+  input[type="range"].range-high {
+    background: linear-gradient(90deg, 
+      #6bcf7f 0%, 
+      #6bcf7f var(--progress, 0%), 
+      rgba(232, 232, 232, 0.3) var(--progress, 0%), 
+      rgba(232, 232, 232, 0.3) 100%);
+  }
+
+  input[type="range"].range-excellent {
+    background: linear-gradient(90deg, 
+      #4ecdc4 0%, 
+      #4ecdc4 var(--progress, 0%), 
+      rgba(232, 232, 232, 0.3) var(--progress, 0%), 
+      rgba(232, 232, 232, 0.3) 100%);
+  }
+
+  /* Desktop enhancements - min-width 768px */
+  @media (min-width: 768px) {
+    .top_header {
+      max-width: 1200px;
+      margin: 0 auto;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    .header {
+      padding: 30px 40px;
+    }
+    
+    .bottom_div {
+      padding: 30px 40px;
+      display: grid;
+      grid-template-columns: 1fr 350px;
+      gap: 30px;
+    }
+    
+    .my_tasks {
+      grid-column: 1;
+    }
+    
+    .remain_tasks, .completed_section {
+      grid-column: 2;
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+    }
+    
+    .task_item {
+      margin-bottom: 12px;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: all 0.3s ease;
+    }
+    
+    .task_item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+    }
+    
+    .footer_nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 40px;
+    }
+    
+    .modal_content {
+      max-width: 600px !important;
+    }
+    
+    .stats_grid {
+      grid-template-columns: repeat(4, 1fr) !important;
+    }
+    
+    .settings_category, .account_section {
+      max-width: 800px;
+      margin: 0 auto 30px;
+    }
+  }
+  
+  /* Large desktop enhancements - min-width 1024px */
+  @media (min-width: 1024px) {
+    .bottom_div {
+      grid-template-columns: 2fr 1fr;
+      gap: 40px;
+    }
+    
+    .header h1 {
+      font-size: 2.5rem;
+    }
+    
+    .task_item {
+      padding: 20px;
+    }
+    
+    .remain_tasks {
+      padding: 25px;
+    }
+  }
 `;
 document.head.appendChild(style);
 
@@ -863,3 +1523,102 @@ if (typeof module !== 'undefined' && module.exports) {
     notificationManager
   };
 }
+
+// Show notifications modal
+function showNotificationsModal() {
+  const notifications = notificationManager.getAllNotifications();
+  const modal = document.createElement('div');
+  modal.className = 'modal_overlay';
+  
+  let notificationsList = '';
+  if (notifications.length === 0) {
+    notificationsList = '<p style="text-align: center; color: #999; padding: 20px;">No notifications yet</p>';
+  } else {
+    notificationsList = notifications.map(notif => {
+      const timeAgo = getTimeAgo(new Date(notif.timestamp));
+      const typeIcon = getNotificationIcon(notif.type);
+      return `
+        <div class="notification_item ${notif.read ? 'read' : 'unread'}" data-id="${notif.id}">
+          <div class="notif_icon ${notif.type}">${typeIcon}</div>
+          <div class="notif_content">
+            <p>${notif.message}</p>
+            <span class="notif_time">${timeAgo}</span>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+  
+  modal.innerHTML = `
+    <div class="modal_content">
+      <div class="modal_header">
+        <h3>Notifications</h3>
+        <div>
+          <button onclick="notificationManager.markAllAsRead(); this.closest('.modal_overlay').remove(); notificationManager.updateNotificationBadge();" style="background: #f4c97a; color: white; border: none; padding: 5px 10px; border-radius: 5px; margin-right: 10px; font-size: 12px;">Mark All Read</button>
+          <button onclick="this.closest('.modal_overlay').remove()" style="background: none; border: none; font-size: 20px; cursor: pointer;">&times;</button>
+        </div>
+      </div>
+      <div class="notifications_list">
+        ${notificationsList}
+      </div>
+    </div>
+  `;
+  
+  modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+  modal.querySelector('.modal_content').style.cssText = 'background: white; border-radius: 10px; width: 90%; max-width: 500px; max-height: 80vh; overflow: hidden;';
+  modal.querySelector('.modal_header').style.cssText = 'padding: 15px 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; align-items: center;';
+  modal.querySelector('.notifications_list').style.cssText = 'max-height: 400px; overflow-y: auto; padding: 10px;';
+  
+  document.body.appendChild(modal);
+  
+  // Add click handlers for individual notifications
+  modal.querySelectorAll('.notification_item.unread').forEach(item => {
+    item.addEventListener('click', function() {
+      const id = parseInt(this.dataset.id);
+      notificationManager.markAsRead(id);
+      this.classList.remove('unread');
+      this.classList.add('read');
+    });
+  });
+}
+
+// Helper functions
+function getTimeAgo(date) {
+  const now = new Date();
+  const diff = now - date;
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(diff / 3600000);
+  const days = Math.floor(diff / 86400000);
+  
+  if (minutes < 1) return 'Just now';
+  if (minutes < 60) return `${minutes}m ago`;
+  if (hours < 24) return `${hours}h ago`;
+  return `${days}d ago`;
+}
+
+function getNotificationIcon(type) {
+  const icons = {
+    'success': '✓',
+    'error': '⚠',
+    'warning': '⚠',
+    'info': 'ℹ'
+  };
+  return icons[type] || 'ℹ';
+}
+
+// Add notification styles
+const notificationStyles = document.createElement('style');
+notificationStyles.textContent = `
+  .notification_item { display: flex; padding: 12px; border-bottom: 1px solid #f0f0f0; cursor: pointer; }
+  .notification_item:hover { background: #f9f9f9; }
+  .notification_item.unread { background: #f0f8ff; border-left: 3px solid #f4c97a; }
+  .notif_icon { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 12px; font-weight: bold; }
+  .notif_icon.success { background: #e8f5e8; color: #4caf50; }
+  .notif_icon.error { background: #ffeaea; color: #f44336; }
+  .notif_icon.warning { background: #fff8e1; color: #ff9800; }
+  .notif_icon.info { background: #e3f2fd; color: #2196f3; }
+  .notif_content { flex: 1; }
+  .notif_content p { margin: 0 0 4px 0; font-size: 14px; }
+  .notif_time { font-size: 12px; color: #999; }
+`;
+document.head.appendChild(notificationStyles);
