@@ -389,6 +389,110 @@ body.dark-mode {
     cursor: pointer;
   }
 
+  /* Completed tasks view */
+  .completed_tasks_view {
+    margin-top: 30px;
+    box-shadow:
+      #6e6e6e 0px 4px 6px -1px,
+      #6e6e6e 0px 2px 4px -1px;
+    background-color: var(--bg-secondary);
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+    margin-bottom: 100px;
+  }
+
+  .completed_tasks_view h3 {
+    font-weight: 700;
+    color: rgb(43, 37, 7);
+    background-color: var(--accent-soft);
+    padding: 5px 10px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    width: 100%;
+    box-shadow:
+      #6e6e6e 0px 4px 6px -1px,
+      #6e6e6e 0px 2px 4px -1px;
+    margin-top: 0;
+  }
+
+  .completed_tasks_list {
+    margin: 20px 10px 20px 10px;
+    padding: 15px;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    border-bottom-left-radius: 15px;
+    border-bottom-right-radius: 15px;
+  }
+
+  /* Back to home button */
+  .back_to_home_btn {
+    background-color: var(--accent-primary);
+    color: rgb(43, 37, 7);
+    padding: 12px 20px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin: 20px auto;
+    display: block;
+    font-size: 14px;
+  }
+
+  .back_to_home_btn:hover {
+    background-color: var(--accent-soft);
+    transform: translateY(-2px);
+    box-shadow: 0px 4px 8px rgba(0,0,0,0.2);
+  }
+
+  /* Disabled checkbox styling */
+  input[type="checkbox"]:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f0f0f0;
+  }
+
+  input[type="checkbox"]:disabled:checked {
+    background: #9cc3a5;
+    border-color: #9cc3a5;
+    opacity: 0.8;
+  }
+
+  .my_tasks .task_list .task_item.completed {
+    background-color: var(--accent-glow);
+    opacity: 0.8;
+    border-left: 4px solid #9cc3a5;
+    padding: 18px 20px 18px 30px;
+    margin-bottom: 8px;
+  }
+
+  .my_tasks .task_list .task_item.completed label {
+    text-decoration: line-through;
+    color: var(--text-muted);
+    padding: 2px 0;
+  }
+
+  .my_tasks .task_list .task_item.completed:hover {
+    transform: translateX(3px);
+    opacity: 0.9;
+    padding: 18px 22px 18px 32px;
+  }
+
+  .completed_section {
+    margin-top: 40px;
+    padding: 0 5px;
+    opacity: 0.9;
+  }
+
+  .completed_section h3 {
+    background: linear-gradient(135deg, #9cc3a5, #a8d5ba);
+    color: #fff;
+    padding: 12px 20px;
+    margin-bottom: 15px;
+  }
+
   .my_tasks .task_list .task_item:hover {
     transform: translateX(5px);
     background-color: var(--accent-glow);
@@ -1588,6 +1692,28 @@ body.dark-mode {
   .login_footer a:hover {
     color: #e0b86a;
     text-decoration: underline;
+  }
+
+  /* Terms Agreement */
+  .terms_agreement {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    font-size: 13px;
+  }
+
+  .terms_agreement input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+  }
+
+  .terms_agreement label {
+    margin: 0;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 500;
+    line-height: 1.4;
   }
 
   /* Background Decorations */
